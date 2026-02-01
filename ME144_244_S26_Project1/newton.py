@@ -12,5 +12,5 @@ plt.legend()
 plt.xlabel('x')
 plt.ylabel('Cost')
 plt.title('Objective Functions Comparison')
-plt.savefig("figures/problem1a_objectives.png", dpi=300, bbox_inches="tight") #Save graph as png
+# plt.savefig("figures/problem1a_objectives.png", dpi=300, bbox_inches="tight") #Save graph as png
 plt.show()
