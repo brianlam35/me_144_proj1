@@ -28,15 +28,21 @@ from typing import List
 # Helper Functions
 def cost_func_a(design_array: List[float]) -> np.ndarray:
     # Return a numpy array of the cost for each value in design_array
-    return 0
+    x = design_array[:,0] # turn 2D array into 1D array [[x1], [x2], ...] -> [x1, x2, ...]
+    return x**2 # apply to each element
 
 def cost_func_b(design_array: List[float]) -> np.ndarray:
     # Return a numpy array of the cost for each value in design_array
-    return 0
+    x = design_array[:,0]
+    return (x + (np.pi/2 * np.sin(x)))**2 # applies to each element
+
 
 def sort(pi: np.ndarray) -> List[np.ndarray, np.ndarray]:
     # Return a list with an array of the sorted costs and an array of the index order
-    return [] 
+    ind  = np.argsort(pi).reshape(-1,1)  # get indices that would sort pi [[3], [0], ...] (low-> high)
+    new_pi = pi[ind[:,0]]               # reorder pi using indices [pi[3], pi[0], ...] -> [0.5, 1.0, ...]
+                                        # ind[:,0] -> [3, 1, ...] then apply pi for value
+    return [new_pi, ind]
 
 # Freebie
 def reorder(design_array: List[float], ind: np.ndarray) -> List[float]:
@@ -47,23 +53,24 @@ def reorder(design_array: List[float], ind: np.ndarray) -> List[float]:
     return design_array
 
 # Fill in the Givens
-P = 
-TOL_GA = 
-G = 
-S = 
+P = 12
+TOL_GA = 1e-6
+G = 100
+S = 50
+K = 12
 lim = [-20,20]
-dv = 
+dv = 1
 
 domain_range = lim[1]-lim[0]
 domain_min = lim[0]
 
 # Initialize
 PI = np.ones((G, S))
-design_array = domain_range*np.random.rand(S, dv)+domain_min
+design_array = domain_range*np.random.rand(S, dv)+domain_min 
 g = 0
-PI_min = np.zeros(G)
-PI_avg = np.zeros(G)
-MIN = 1000
+PI_min = np.zeros(G) # best cost in generation g
+PI_avg = np.zeros(G) # average cost in generation g
+MIN = 1000 # large initial value for minimum cost
 
 # First generation
 pi = cost_func_b(design_array)   # evaluate the fitness of each genetic string
@@ -77,6 +84,8 @@ MIN = np.min(new_pi)
 
 design_array = reorder(design_array, ind)
 
+g = 1
+
 # All later generations
 while (MIN > TOL_GA) and (g < G):
      
@@ -87,10 +96,10 @@ while (MIN > TOL_GA) and (g < G):
         if P % 2:
             print('P is odd. Choose an even number of parents.')
             break
-        phi1 = np.random.rand()
-        phi2 = 
-        children[p,:]   = 
-        children[p+1,:] = 
+        phi1 = np.random.rand() # how much parent contributes
+        phi2 = np.random.rand()
+        children[p,:]   = phi1*parents[p,:] + (1-phi1)*parents[p+1,:] #mate parent 0 and 1
+        children[p+1,:] = phi2*parents[p,:] + (1-phi2)*parents[p+1,:] # same parents different contribution
         
     # Update design_array (with parents)
     new_strings = 
