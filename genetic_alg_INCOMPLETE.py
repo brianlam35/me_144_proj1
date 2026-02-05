@@ -91,18 +91,28 @@ while (MIN > TOL_GA) and (g < G):
      
     # Mating 
     parents = design_array[0:P,:]
-    children = np.zeros((P, dv))
-    for p in list(range(0,P,2)): # p = 0, 2, 4, 6,...      
-        if P % 2:
+    children = np.zeros((K, dv))
+
+    if P % 2:
             print('P is odd. Choose an even number of parents.')
             break
+    if K % 2:
+            print('K is odd. Choose an even number of children.')
+            break
+
+    for c in range(0,K,2): # p = 0, 2, 4, 6,...  
+
+        #which parents to mate? (p and p+1)
+        pair = (c//2) % (P//2) # pair = 0, 0, 1, 1, 2, 2,... (wraps around after P/2 pairs)
+        p = 2*pair # p = 0, 0, 2, 2, 4, 4,... (wraps around after P parents)
+
         phi1 = np.random.rand() # how much parent contributes
         phi2 = np.random.rand()
-        children[p,:]   = phi1*parents[p,:] + (1-phi1)*parents[p+1,:] #mate parent 0 and 1
-        children[p+1,:] = phi2*parents[p,:] + (1-phi2)*parents[p+1,:] # same parents different contribution
+        children[c,:]   = phi1*parents[p,:] + (1-phi1)*parents[p+1,:] #mate parent 0 and 1
+        children[c+1,:] = phi2*parents[p,:] + (1-phi2)*parents[p+1,:] # same parents different contribution
         
     # Update design_array (with parents)
-    new_strings = 
+    new_strings = domain_range*np.random.rand(S-P-K, dv)+domain_min
     design_array = np.vstack((parents, children, new_strings)) # concatenate vertically
 
     # Update design_array (no parents)
@@ -110,15 +120,15 @@ while (MIN > TOL_GA) and (g < G):
     #design_array = np.vstack((children, new_strings)) # concatenate vertically
 
     # Evaluate fitness of new population
-    pi =         
+    pi = cost_func_b(design_array)   # evaluate the fitness of each genetic string        
     [new_pi, ind] = sort(pi) 
     
     PI[g, :] = new_pi.reshape(1,S)        
     
-    PI_min[g] = 
-    PI_avg[g] = 
+    PI_min[g] = np.min(new_pi)
+    PI_avg[g] = np.mean(new_pi)
     if PI_min[g] < MIN:
-        MIN = 
+        MIN = PI_min[g]
             
     design_array = reorder(design_array, ind)
     print(', '.join(('g = %s' % g, 'MIN = %s' % MIN)))
