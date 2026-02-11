@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
 from typing import List
+import os
+
+os.makedirs("figures", exist_ok=True) # Create directory for figures if it doesn't exist
 #plt.rcParams.update({
 #    "text.usetex": True,
 #    "font.family": "Computer Modern Roman",
@@ -37,20 +40,21 @@ def cost_func_b(design_array: List[float]) -> np.ndarray:
     return (x + (np.pi/2 * np.sin(x)))**2 # applies to each element
 
 
-def sort(pi: np.ndarray) -> List[np.ndarray, np.ndarray]:
+def sort(pi: np.ndarray):
     # Return a list with an array of the sorted costs and an array of the index order
+    pi = np.asarray(pi).reshape(-1)
     ind  = np.argsort(pi).reshape(-1,1)  # get indices that would sort pi [[3], [0], ...] (low-> high)
     new_pi = pi[ind[:,0]]               # reorder pi using indices [pi[3], pi[0], ...] -> [0.5, 1.0, ...]
                                         # ind[:,0] -> [3, 1, ...] then apply pi for value
-    return [new_pi, ind]
+    return new_pi, ind
 
 # Freebie
-def reorder(design_array: List[float], ind: np.ndarray) -> List[float]:
-    temp = np.zeros((S,dv))
-    for i in range(0, len(ind)):
-        temp[i,:] = design_array[ind[i][0]]
-    design_array = temp
-    return design_array
+def reorder(design_array, ind):
+    temp = np.zeros_like(design_array) # same shape as input
+    for i in range(len(ind)):
+        temp[i,:] = design_array[ind[i,0], :]
+    return temp
+
 
 # Fill in the Givens
 P = 12
@@ -58,15 +62,15 @@ TOL_GA = 1e-6
 G = 100
 S = 50
 K = 12
-lim = [-20,20]
+lim = np.array([[-20,20]])
 dv = 1
 
-domain_range = lim[1]-lim[0]
-domain_min = lim[0]
+domain_range = lim[:, 1] - lim[:, 0]
+domain_min = lim[:, 0]
 
 # Initialize
 PI = np.ones((G, S))
-design_array = domain_range*np.random.rand(S, dv)+domain_min 
+design_array = domain_range*np.random.rand(S, dv) + domain_min 
 g = 0
 PI_min = np.zeros(G) # best cost in generation g
 PI_avg = np.zeros(G) # average cost in generation g
@@ -112,7 +116,7 @@ while (MIN > TOL_GA) and (g < G):
         children[c+1,:] = phi2*parents[p,:] + (1-phi2)*parents[p+1,:] # same parents different contribution
         
     # Update design_array (with parents)
-    new_strings = domain_range*np.random.rand(S-P-K, dv)+domain_min
+    new_strings = domain_range*np.random.rand(S-P-K, dv) + domain_min
     design_array = np.vstack((parents, children, new_strings)) # concatenate vertically
 
     # Update design_array (no parents)
@@ -140,8 +144,8 @@ ax.semilogy(np.arange(0,g), PI_min[0:g])
 ax.semilogy(np.arange(0,g), PI_avg[0:g])
 plt.xlabel('Generation Number',  fontsize=20)
 plt.ylabel('Cost', fontsize=20)
-#title_str = '\n'.join(('Results of Genetic Algorithm with', 'Parents included in Subsequent Generations'))
-title_str = '\n'.join(('Results of Genetic Algorithm without', 'Parents included in Subsequent Generations'))
+title_str = '\n'.join(('Results of Genetic Algorithm with', 'Parents included in Subsequent Generations'))
+#title_str = '\n'.join(('Results of Genetic Algorithm without', 'Parents included in Subsequent Generations'))
 plt.title(title_str, fontsize=20)
 plt.legend(['Min Cost', 'Avg Cost'])
 plt.show()

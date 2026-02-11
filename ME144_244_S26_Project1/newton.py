@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+
+os.makedirs("figures", exist_ok=True) # Create directory for figures if it doesn't exist
 
 
 
@@ -187,7 +190,8 @@ def ddPi_b(x):
     g   = x + (np.pi/2) * np.sin(x)
     gp  = 1 + (np.pi/2) * np.cos(x)
     gpp = -(np.pi/2) * np.sin(x)
-    return 2 * (gp**2 + g * gpp)
+    val = 2 * (gp**2 + g * gpp)
+    return val.reshape(1,1)
 # endregion
 
 # Graph Pi_a hist
